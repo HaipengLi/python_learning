@@ -140,3 +140,158 @@ else:
 
 Note that `sorted(array)` can be replaced as `array.sort()`
 
+## 006 define a function
+
+`def function name(parameter list):`
+
+---
+
+define a function to calculate absolute value
+
+```python
+def my_abs(x):
+    if x >= 0:
+        return x
+    else:
+        return -x
+```
+
+---
+
+define a function to calculate Fibonacci sequence
+
+```python
+def Fibonacci(n):
+	if(n==0):
+		return 0
+	if(n==1)or(n==2):
+		return 1
+	else:
+		return Fibonacci(n-1)+Fibonacci(n-2)
+```
+
+## 007 something more about `print()`
+
+### print a empty line
+
+`print()` is ok
+
+### print several empty line
+
+`print("\n")` print 2 empty line
+
+### print without a  new line
+
+`print(something, end="")` is ok
+
+### print with format
+
+---
+
+example: print 9*9 multiplication table
+
+```python
+for row in range(1,10):
+	for col in range(row,10):
+		print("%1d * %1d = %2d "%(row,col,row*col),end=" ")
+	print("\n")
+```
+
+---
+
+format: `print(sth,"%3.1f & %6.2f "%(a,b),sth)`
+
+%3.1f: width is 3, round to the nearest tenth
+
+## `008 import time`
+### `time.delay(1)`
+```python
+import time
+time.delay(1)#delay one second
+```
+### some other thing about time
+
+![time module](./time_module.jpg)
+
+```python
+>>> time.time()#Timestamp
+1485148323.7097616
+>>> time.localtime(time.time())#struct_time
+time.struct_time(tm_year=2017, tm_mon=1, tm_mday=23, tm_hour=13, tm_min=12, tm_sec=51, tm_wday=0, tm_yday=23, tm_isdst=0)
+>>> time.asctime()# string: %a %b %d %H:%M:$S %Y
+'Mon Jan 23 13:13:12 2017'
+```
+
+## `009 dict`
+
+### basic operation: define, find
+
+```python
+>>> Score={'Leo':100,'Bob':70}
+>>> Score
+{'Leo': 100, 'Bob': 70}
+>>> Score['Leo']
+100
+>>> Score['Hah'] #bad way
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+KeyError: 'Hah'
+    
+>>> 'Leo' in Score #good way
+True
+>>> 'Hah' in Score
+False
+```
+
+###  add
+
+```python
+>>> Score['Harry']=80
+>>> Score
+{'Leo': 100, 'Bob': 70, 'Harry': 80}
+>>> Score[100]=2
+>>> Score
+{'Leo': 100, 'Bob': 70, 'Harry': 80, 100: 2}
+```
+
+### remove
+
+```python
+>>> Score.pop(100)
+'Leo'
+>>> Score
+{'Leo': 100, 'Bob': 70, 'Harry': 80}
+```
+
+### use `dict` in loop
+
+```python
+# wrong way
+>>> for key,value in Score:
+...     print(Score[key])
+...
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: too many values to unpack (expected 2)
+```
+
+```python
+# right way
+>>> for key,value in dict.items(Score):
+...     print(Score[key])
+...
+100
+70
+80
+```
+
+```python
+# right way
+>>> for key in Score:
+...     print(key,": ",Score[key])
+...
+Leo :  100
+Bob :  70
+Harry :  80
+```
+
