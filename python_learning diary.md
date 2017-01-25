@@ -20,6 +20,8 @@ names = ['Michael', 'Bob', 'Tracy']
 for name in names:
 print(name)
 ```
+> Note that x== (the last element in list) rather than (the last +1 )
+
 - `range()` generate a sequence, and `list()` convert it to a list
 
 ```python
@@ -204,10 +206,10 @@ format: `print(sth,"%3.1f & %6.2f "%(a,b),sth)`
 %3.1f: width is 3, round to the nearest tenth
 
 ## `008 import time`
-### `time.delay(1)`
+### `time.sleep(1)`
 ```python
 import time
-time.delay(1)#delay one second
+time.sleep(1)#delay one second
 ```
 ### some other thing about time
 
@@ -294,4 +296,6 @@ Leo :  100
 Bob :  70
 Harry :  80
 ```
+
+## 010 
 
