@@ -205,7 +205,7 @@ format: `print(sth,"%3.1f & %6.2f "%(a,b),sth)`
 
 %3.1f: width is 3, round to the nearest tenth
 
-## `008 import time`
+## 008 `import time`
 ### `time.sleep(1)`
 ```python
 import time
@@ -224,7 +224,19 @@ time.struct_time(tm_year=2017, tm_mon=1, tm_mday=23, tm_hour=13, tm_min=12, tm_s
 'Mon Jan 23 13:13:12 2017'
 ```
 
-## `009 dict`
+### `time.strftime(format[,t])`
+
+按给定格式返回string型日期
+
+```python
+>>> time.strftime("%d/%m/%Y %H:%M:%S")
+'02/02/2017 19:53:58'
+```
+
+
+
+
+## 009 `dict`
 
 ### basic operation: define, find
 
@@ -297,5 +309,85 @@ Bob :  70
 Harry :  80
 ```
 
-## 010 
+## 010 `import datetime` 
+
+> The [`datetime`](https://docs.python.org/3/library/datetime.html#module-datetime) module supplies classes for manipulating dates and times
+>
+> see **./016.py**
+
+### 4 avaliable types
+
+- *class* `datetime.date`
+
+*class*  `datetime.date`(*year*, *month*, *day*)
+
+- *class* `datetime.time`
+
+*class* `datetime.time`(*hour=0*, *minute=0*, *second=0*, *microsecond=0*, *tzinfo=None*, ***, *fold=0*)
+
+- *class* `datetime.dateime`
+
+*class* `datetime.datetime`(*year*, *month*, *day*, *hour=0*, *minute=0*, *second=0*, *microsecond=0*, *tzinfo=None*, ***, *fold=0*)
+
+- *class* `datetime.timedelta`
+
+*class* `datetime.timedelta`(*days=0*, *seconds=0*, *microseconds=0*, *milliseconds=0*, *minutes=0*, *hours=0*, *weeks=0*)
+
+### useful conversion
+
+##### convert `string `to `datetime object`
+
+```python
+>>> import datetime
+>>> strTime='2017年2月4日'
+>>> Time=datetime.datetime.strptime(strTime,'%Y年%m月%d日')
+>>> Time
+datetime.datetime(2017, 2, 4, 0, 0)
+```
+
+##### convert `datetime object` to `string`
+
+```python
+>>> strTime2=datetime.datetime.strftime(Time,'%Y-%m-%d')
+>>> strTime2
+'2017-02-04'
+```
+
+## 011 some methods of `str` type
+
+`str.isdigit()`
+
+`str.isalpha()`
+
+`str.isXXX()`
+
+> see **./017.py**
+
+```python
+myString=str(input("Input a string: "))
+NumOfLetters=0
+NumOfSpaces=0
+NumOfDigits=0
+NumOfOthers=0
+for myChar in myString:
+    print(myChar)
+    if(myChar.isalpha()):
+        NumOfLetters+=1
+    elif(myChar.isdigit()):
+        NumOfDigits+=1
+    elif(myChar==' '):
+        NumOfSpaces+=1
+    else:
+        NumOfOthers+=1
+print('NumOfLetters: %d\nNumOfDigits: %d\nNumOfSpaces: %d\nNumOfOthers: %d'%(NumOfLetters,NumOfDigits,NumOfSpaces,NumOfOthers))
+
+```
+
+## 012 strip()
+用于移除字符串头尾的指定字符，默认为空格
+```python
+>>> myStr=" ok "
+>>> myStr.strip()
+'ok'
+```
 
