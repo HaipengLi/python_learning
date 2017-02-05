@@ -293,5 +293,155 @@ at 2017-02-04 22:08:00 from 法制晚报
 
 
 
+### 抓取新闻正文部分，并合并至一个string内 
 
+```python
+>>> ' '.join([p.text.strip() for p in soup.select('#articleContent .left p')[:-1]])
+'原标题：你们警察在街上到处“溜达”有什么用？网友评论亮了！ 走在大街上，我们经常会看到这样的情景： 没错，就是三五警察在街上来回的“溜达” 最近，有网友不理解警察这样“溜达”有什么作用，于是向中国警察网发起了提问： 你能放心地溜达正是因为这些尽职尽责警察的“溜达”！ 这个回答赢得了很多网友以及警察同行的认同 他们“溜达”，一些别有用心的人才不敢出来“溜达”： 他们“溜达”，人们才可以安心地享受生活： 他们“溜达”，迷失的孩子才能找到家： 他们“溜达”，其实是拿生命在做代价： 风里雨里节日里，他们从未停止“溜达”，正是因为这样，我们才能放心随意的溜达。向所有奋战在一线的人民警察致敬！'
+```
+
+> 其中 `soup.select('#articleContent .left p')`选中所有正文部分的标签， `[:-1]` 剔除了最后一条'责任编辑:xxx' 
+>
+> 使用一行语句创建一个list ： `[x*x for x in range(10)]`
+>
+> 最后用 '[char]'.join() 连接list的所有元素至一个string类型中
+
+### 抓取编辑人
+
+```python
+>>> soup.select('.article-editor')[0].text.strip('责任编辑：').strip()
+'隗俊'
+```
+
+### [难] 抓取评论数
+
+这个评论个数是通过js获取的，不会直接出现在doc里面。因此首先需要在Network里面找到对应的response（老师只提了地毯式搜索评论数字）
+
+找到之后得到的是json格式，需要调用json.loads()解析为python dict类型然后操作
+
+```python
+comment=requests.get('http://comment5.news.sina.com.cn/page/info?version=1&\
+                     format=js&channel=gn&newsid=comos-fyafcyw0191857&group=&compress=0&\
+                     ie=utf-8&oe=utf-8&page=1&page_size=20&jsvar=loader_1486283153548_11337534')
+import json
+json.loads(comment.text)['result']['count']['total']
+```
+
+
+
+result：
+
+```
+6768
+```
+
+### 剖析新闻标识符
+
+### 给定链接:`http://news.sina.com.cn/c/nd/2017-02-04/doc-ifyafcyw0191857.shtml` 其中`fyafcyw0191857`为新闻的id，如何对string操作然后提取出id？
+
+#### 方法一 str.split() + str.strip() 分割，切除
+
+```python
+>>> newsid='http://news.sina.com.cn/c/nd/2017-02-04/doc-ifyafcyw0191857.shtml'
+>>> newsid.split('/')[-1].rstrip('.shtml').lstrip('doc-i')
+```
+
+result:
+
+```
+'fyafcyw0191857'
+```
+
+> 其中newsid.split('/')将字符串按'/'切分，再用[-1]取list最后一个元素，即''doc-ifyafcyw0191857.shtml'
+
+#### 方法二 正则表达式
+
+```python
+import re
+m=re.search('doc-i(.*).shtml',newsid)
+m.group(1)
+```
+
+result:
+
+```
+'fyafcyw0191857'
+```
+
+> m.group(0)为匹配到的字符串
+>
+> m.group(1)为(.*)的内容
+
+### 更进一步：建立评论数抽取函式
+
+```python
+import re
+import json
+import requests
+def getID(url):
+    m=re.search('doc-i(.*).shtml',url)
+    newsID=m.group(1)
+    key='http://comment5.news.sina.com.cn/page/info?version=1&\
+format=js&channel=gn&newsid=comos-{}&group=&compress=0&\
+ie=utf-8&oe=utf-8&page=1&page_size=20'
+    key=key.format(newsID)
+    Comment=requests.get(key)
+    m=re.search('var(.*)={',Comment.text)
+    Comment=Comment.text.lstrip(m.group(0)[:-1])
+    Comment=json.loads(Comment)
+    return Comment['result']['count']['total']
+
+#call
+url='http://news.sina.com.cn/o/2017-02-05/doc-ifyafenm2755085.shtml'
+getID(url)
+#result:
+#42
+```
+
+### 作业： 将以上所有内容写为一个函数，返回字典类型。
+
+- 传入：新闻链接
+- 传出：新闻details
+
+```python
+import requests
+from bs4 import BeautifulSoup
+import re
+import json
+from datetime import datetime
+def GetNewsDetails(url):
+    #including title, time , source, body, writer, number of comments
+    result={}
+    res=requests.get(url)
+    res.encoding='utf-8'
+    soup1=BeautifulSoup(res.text,'html.parser')
+    result['hearder']=soup1.select('#artibodyTitle')[0].text#header
+    result['time']=soup1.select('.time-source')[0].contents[0].strip()#time
+    result['time']=datetime.strptime( result['time'],'%Y年%m月%d日%H:%M')
+    result['source']=soup1.select('.time-source a')[0].text#source
+    result['body']='\n'.join([p.text for p in soup1.select('#artibody p')[:-1]])#body
+    result['writer']=soup1.select('#artibody p')[-1].text.lstrip('责任编辑：')#writer
+    key='http://comment5.news.sina.com.cn/page/info?version=1&\
+format=js&channel=gn&newsid=comos-{}&group=&compress=0&\
+ie=utf-8&oe=utf-8&page=1&page_size=20'
+    news_id=re.search('doc-i(.*).shtml',url).group(1)
+    key=key.format(news_id)
+    res2=requests.get(key)
+    #soup2=BeautifulSoup(res2.text,'html.parser')# not needed
+    flag=re.search('var(.*)={',res2.text)
+    if(flag):
+       res2=res2.text.lstrip(flag.group(0)[:-1])
+    result['NumOfCom']=json.loads(res2)['result']['count']['total']
+    return result
+```
+
+```python
+>>>> GetNewsDetails('http://news.sina.com.cn/o/2017-02-05/doc-ifyafenm2755085.shtml')
+{'NumOfCom': 47,
+ 'body': '\u3000\u3000原标题：今晨至上午河北等8省有大雾 局地能见度不足50米\n\u3000\u3000中国天气网讯 中央气象台2月5日06时继续发布大雾黄色预警：预计，5日早晨至上午，河北南部、河南中东部、山东西部、安徽北部、湖北中部、湖南北部、贵州中东部、广西中部等地有大雾，其中，河北南部、河南中东部、山东西南部、湖北中部、湖南北部、贵州中部等地的部分地区有能见度低于500米的浓雾，局地有能见度低于50米的特强浓雾。\n\u3000\u3000防御指南：\n\u3000\u30001、由于能见度较低，驾驶人员应控制速度，确保安全；\n\u3000\u30002、机场、高速公路、轮渡码头采取措施，保交通安全。',
+ 'hearder': '今晨至上午河北等8省大雾 局地能见度不足50米',
+ 'source': '中国天气网',
+ 'time': datetime.datetime(2017, 2, 5, 6, 41),
+ 'writer': '张冬 '}
+```
 
